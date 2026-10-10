@@ -184,3 +184,7 @@ html{scroll-behavior:smooth}
 .lp{background:radial-gradient(rgba(168,150,255,.07) 1px,transparent 1.6px) 0 0/24px 24px,var(--ink)}
 .lp .btn.solid{font-weight:600}
 .lp .btn.solid:hover{background:#9b89ff;border-color:#9b89ff}
+
+/* The "who it is for" cards: four of them, so two by two. */
+.lp .trust.why{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:720px){.lp .trust.why{grid-template-columns:minmax(0,1fr)}}

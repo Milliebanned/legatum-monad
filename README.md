@@ -1,33 +1,54 @@
 # Legatum Arca
 
-A non-custodial dead man's switch for MON and stablecoins on Monad. You deposit into a vault, name the people who should receive it, and check in on a schedule you choose. If you stop checking in, the vault pays them automatically.
+**On-chain inheritance. If something happens to you, your family still receives your crypto.**
 
-## Why
+Legatum Arca is a non-custodial dead man's switch on Monad. You put funds in a vault, name the people who should receive them, and confirm you're still alive on a schedule you choose. If one day you can't, the vault pays them automatically.
 
-Self-custody has no inheritance. If you die or lose access to your wallet, the money is stuck: there is no bank to call and nobody your family can ask. Legatum Arca gives a wallet a succession plan that needs no custodian, lawyer or middleman, only a contract that enforces the dates.
+## Why it exists
+
+Crypto has no next of kin. A bank account passes to your family when you die; a wallet doesn't. If you are the only person with the key and something happens to you, everything in that wallet stays on-chain forever, visible to everyone and movable by no one. Millions of bitcoin are believed to be lost this way already.
+
+Nobody plans for it, which is the problem:
+
+- **Someone who travels constantly** boards a flight that doesn't land.
+- **A reporter or aid worker in a conflict zone**, paid in crypto because banks don't reach, doesn't come home.
+- **A soldier on deployment** holds their savings in a wallet only they can open.
+- **Someone who did well in crypto** dies suddenly with everything in one wallet, and their family can see the balance but never touch it.
+
+In each case the money exists and the family is entitled to it, and there is no bank to call and nobody to ask. A will doesn't help, because a court order can't sign a transaction.
+
+Legatum Arca is the instruction you leave behind. It needs no lawyer, no company holding your keys and no trusted friend with your seed phrase, only a contract that waits to hear from you and acts when it doesn't.
 
 ## How it works
 
-1. **Create a vault.** Give it a name, pick a check-in window (30 days to a year) and an optional grace period, and name 1 to 10 beneficiaries with a percentage each.
-2. **Deposit.** A vault holds MON and up to 8 tokens (USDC, AUSD or any other ERC-20). It all stays yours: you can withdraw part of it or close the vault at any time while it is active. Withdrawing the last of everything closes the vault automatically.
-3. **Check in.** One transaction before the window ends resets the clock.
-4. **If you go silent,** the window and then the grace period run out, and the vault sends every beneficiary their share of every asset, straight to their wallet. Nobody has to claim anything.
-5. **Safety net.** Checking in after the deadline still works, as long as the payout has not been sent yet.
+1. **Sign in and create a vault.** An email is enough; a wallet is made for you. Name the vault, choose how often you'll confirm you're still here (every 30 days to once a year) and an optional grace period.
+2. **Name your family.** Add 1 to 10 people by email or wallet address, with a percentage each. Someone named by email who has no wallet gets one made for them, and it is theirs the first time they sign in.
+3. **Deposit.** A vault holds MON and up to 8 tokens (USDC, AUSD or any other ERC-20). It all stays yours: you can withdraw or close the vault at any time. Withdrawing the last of everything closes it automatically.
+4. **Check in.** One tap before the window ends resets the clock. While you keep doing that, nothing moves and nobody else can touch the vault.
+5. **If you go silent,** the window and then the grace period run out, and the vault sends every person their share of every asset, straight to their wallet. They don't have to claim anything, prove anything or know the vault existed.
+6. **Safety net.** If you're fine and simply late, checking in still works as long as the payout hasn't been sent.
 
-You can have any number of vaults, each with its own people, shares and timer, and you can change a vault's beneficiaries while it is active.
+You can have any number of vaults, each with its own people, shares and timer, and change a vault's beneficiaries whenever you like.
 
-The app also has a **Send** page for paying the same people right away from your wallet, in MON, USDC or AUSD.
+The app also has:
+
+- **Wallet:** what you hold outside your vaults, and your address for receiving funds.
+- **Swap:** trade MON for a stablecoin (or back) before locking it away, so what your family receives doesn't move with the market. Runs through Privy's swap service on Monad mainnet.
+- **Send:** pay the same people right away, by email or address.
 
 ## Deployment
 
-Not deployed yet. `npm run deploy:testnet` and `npm run deploy:monad` write the addresses to `frontend/src/deployedTestnet.js` and `frontend/src/deployedMainnet.js`.
+Live on **Monad testnet** (chain ID 10143). Mainnet is not deployed yet.
 
-| | Mainnet | Testnet |
-|---|---|---|
-| Chain ID | 143 | 10143 |
-| RPC | `https://rpc.monad.xyz` | `https://testnet-rpc.monad.xyz` |
-| USDC | `0x754704Bc059F8C67012fEd69BC8A327a5aafb603` | test token deployed with the factory |
-| AUSD | `0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a` | test token deployed with the factory |
+| | Monad testnet |
+|---|---|
+| VaultFactory | `0xf99DC9C15c7640454CAa8D535128C81D30d0Eb07` |
+| Vault implementation | `0x08D2071Af0C2f49Bb2a6b0F7E11ED5d7f4aFC534` |
+| KeeperReceiver | `0x01F519E360Ff24321d4233bD8656418F1c33dE1a` |
+| Test USDC | `0xad502D1bd2DdCD1B4E7284b8DBf2b0c442f9721D` |
+| Test AUSD | `0xc29955e4bc3284481496992295DE60C407B41822` |
+
+The factory, vault and keeper receiver are source-verified on Sourcify (exact match). Every vault is a minimal-proxy clone of the vault implementation. On mainnet the app uses the real USDC (`0x754704Bc059F8C67012fEd69BC8A327a5aafb603`) and AUSD (`0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a`).
 
 ## Contracts
 
@@ -76,6 +97,8 @@ cd frontend && npm install && npm run dev:local
 Open http://localhost:5173 and connect a wallet pointed at `http://127.0.0.1:8545` (chain ID 10143). The local chain reuses Monad testnet's chain ID so the contracts' chain check runs unchanged, which means your wallet can't tell the two apart: check its RPC before signing. The account dialog has a button that mints test USDC and AUSD.
 
 `npm run dev` in `frontend/` targets Monad testnet instead. A production build (`npm run build`) targets mainnet.
+
+Email sign-in, naming people by email and swaps use [Privy](https://privy.io). Put `VITE_PRIVY_APP_ID` and `PRIVY_APP_SECRET` in `frontend/.env.local` to turn them on; without an app ID the app falls back to connecting a browser wallet, and people are named by address only. The local-chain build always uses a browser wallet.
 
 ## Deploy
 

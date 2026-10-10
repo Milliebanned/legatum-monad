@@ -90,7 +90,7 @@ const CONFIG = {
   appearance: {
     theme: "dark",
     accentColor: "#836ef9",
-    landingHeader: "Open your vault",
+    landingHeader: "Protect your family",
     loginMessage: "Sign in with your email. No wallet or seed phrase needed.",
     walletChainType: "ethereum-only",
   },

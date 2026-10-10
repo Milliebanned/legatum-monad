@@ -248,8 +248,8 @@ export function EmptyPulse({ loading, onCreate }) {
         {!loading && (
           <>
             <p style={{ color: "var(--mute)" }}>
-              Deposit MON or stablecoins, name the people you trust and pick how often you'll check in. If you ever stop, the vault
-              pays them.
+              Put aside what you'd want your family to have, name them, and pick how often you'll confirm you're still
+              here. If one day you can't, the vault pays them.
             </p>
             <div>
               <button className="btn solid big" type="button" onClick={onCreate}>

@@ -2,15 +2,15 @@ import { Fragment, useEffect } from "react";
 import { mountLanding } from "./landing/effects.js";
 import "../Landing.css";
 
-const HEADLINE = "If you go silent, your assets won't.".split(" ");
+const HEADLINE = "Your crypto shouldn't die with you.".split(" ");
 
 const MARQUEE = [
+  "For the people you'd leave behind",
+  "No lawyer, no custodian",
   "You keep your keys",
-  "Check in with one transaction",
-  "Grace period built in",
-  "Change beneficiaries anytime",
-  "Withdraw whenever you like",
-  "Settles on Monad",
+  "Name family by email",
+  "Paid automatically, nothing to claim",
+  "Change your mind anytime",
 ];
 
 // The extruded mark on the middle card: copies of the logo stacked along Z,
@@ -42,7 +42,7 @@ export default function Landing({ onLaunch }) {
   <div className="wrap">
     <a className="brand" href="#top"><svg><use href="#mark"/></svg>Legatum Arca</a>
     <nav className="links" aria-label="Sections">
-      <a href="#demo">Live demo</a><a href="#how">How it works</a><a href="#trust">Safeguards</a><a href="#faq">Questions</a>
+      <a href="#why">Why</a><a href="#demo">Live demo</a><a href="#how">How it works</a><a href="#trust">Safeguards</a><a href="#faq">Questions</a>
     </nav>
     <a className="btn" href="#demo" onClick={launch}>Open a vault</a>
   </div>
@@ -53,7 +53,7 @@ export default function Landing({ onLaunch }) {
   <div className="aurora"><i className="a1"></i><i className="a2"></i><i className="a3"></i></div>
   <canvas id="stars" aria-hidden="true"></canvas>
   <div className="wrap">
-    <div className="pills"><span className="pill"><b>Built on</b> Monad</span><span className="pill">Non-custodial</span><span className="pill">MON and stablecoins</span></div>
+    <div className="pills"><span className="pill"><b>On-chain</b> inheritance</span><span className="pill">Non-custodial</span><span className="pill">Built on Monad</span></div>
     <h1 className="grad" id="h1">
       {HEADLINE.map((word, i) => (
         <Fragment key={i}>
@@ -62,8 +62,8 @@ export default function Landing({ onLaunch }) {
         </Fragment>
       ))}
     </h1>
-    <p className="sub">Legatum Arca is a dead man's switch for the MON and stablecoins in your wallet. Create a vault, name the people you trust, and check in on your own schedule. If you ever stop, the vault releases to them.</p>
-    <div className="cta"><a className="btn solid" href="#demo" onClick={launch}>Create your vault</a><a className="btn" href="#how">See how it works</a></div>
+    <p className="sub">If you died tomorrow, could your family reach your crypto? Legatum Arca makes sure they can. Put funds in a vault, name the people you love, and confirm you're still here on a schedule you choose. If one day you can't, the vault pays them automatically.</p>
+    <div className="cta"><a className="btn solid" href="#demo" onClick={launch}>Protect your family</a><a className="btn" href="#why">Why it matters</a></div>
 
     <div className="stage" aria-hidden="true">
       <div className="fan" id="fan">
@@ -94,11 +94,25 @@ export default function Landing({ onLaunch }) {
   ))}
 </div></div>
 
-<section id="demo"><div className="wrap">
+<section id="why"><div className="wrap">
   <div className="head rv">
-    <span className="eyebrow">Try the switch</span>
+    <span className="eyebrow">Why it exists</span>
+    <h2>Crypto has no next of kin.</h2>
+    <p>A bank account passes to your family. A wallet doesn't. If you are the only one with the key and something happens to you, what's inside stays on-chain forever, in plain sight, with nobody able to move it. Millions of bitcoin are believed to be lost this way already.</p>
+  </div>
+  <div className="trust why rv">
+    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 15l7-2 4-8 2 .5-1.500 7 5-1.500 1 2-6 4-3 4-1.500-.5.5-4.500-5 1.500z"/></svg><h3>People who are always travelling</h3><p>A flight, a road, a city far from home. If one day you don't come back, your family shouldn't lose your savings as well.</p></div>
+    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg><h3>Reporters and aid workers</h3><p>Working where the risk is real, often paid in crypto because banks don't reach. A vault means what you earned still gets home.</p></div>
+    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6l8-3z"/></svg><h3>Soldiers on deployment</h3><p>Months away, sometimes out of contact. Set it up before you leave, and the people waiting for you are covered whatever happens.</p></div>
+    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2 2M14 9l1.500 1.500"/></svg><h3>Anyone holding it all in one wallet</h3><p>A sudden illness or an accident, and a lifetime of savings is locked behind a key nobody else has. A vault is the instruction you leave behind.</p></div>
+  </div>
+</div></section>
+
+<section id="demo" style={{ paddingTop: "0" }}><div className="wrap">
+  <div className="head rv">
+    <span className="eyebrow">See it happen</span>
     <h2>One tap says you're still here.</h2>
-    <p>This is a working model of a vault. Check in and the timer resets. Stay silent and watch what your family receives.</p>
+    <p>This is a working model of a vault. While you keep checking in, nothing moves. Go silent, as you would if the worst happened, and watch what reaches your family.</p>
   </div>
   <div className="demo rv" id="demoBox">
     <div className="dial">
@@ -106,7 +120,7 @@ export default function Landing({ onLaunch }) {
         <svg viewBox="0 0 200 200" role="img" aria-label="Check-in countdown">
           <circle className="ticks" cx="100" cy="100" r="96" fill="none" stroke="var(--line-2)" strokeWidth="1" strokeDasharray="1 5.7"/>
           <circle cx="100" cy="100" r="84" fill="none" stroke="var(--line)" strokeWidth="6"/>
-          <circle id="arc" cx="100" cy="100" r="84" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeDasharray="527.8" strokeDashoffset="0" style={{ color: "var(--mint)" }}/>
+          <circle id="arc" cx="100" cy="100" r="84" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeDasharray="527.8" strokeDashoffset="0" style={{ color: "var(--accent)" }}/>
         </svg>
         <div className="ringtxt"><div id="num">62</div><div id="unit">days to check in</div></div>
       </div>
@@ -131,18 +145,18 @@ export default function Landing({ onLaunch }) {
 </div></section>
 
 <section id="how" style={{ paddingTop: "0" }}><div className="wrap">
-  <div className="head rv"><span className="eyebrow">How it works</span><h2>Four steps, then you get on with your life.</h2></div>
+  <div className="head rv"><span className="eyebrow">How it works</span><h2>Set it up once, then get on with your life.</h2></div>
   <div className="steps">
     <div className="rail"></div>
-    <div className="step rv"><div className="no">1</div><h3>Create a vault</h3><p>Connect your wallet on Monad and deposit the MON, USDC or AUSD you want protected. It stays yours and you can withdraw at any time.</p></div>
-    <div className="step rv" style={{ "--rd": ".1s" }}><div className="no">2</div><h3>Name your people</h3><p>Add the wallet addresses of family or friends and set each person's share. Split it any way you like.</p></div>
-    <div className="step rv" style={{ "--rd": ".2s" }}><div className="no">3</div><h3>Check in</h3><p>Pick a window, from 30 days to a year. One signed tap before it ends resets the clock. A calendar entry reminds you well ahead.</p></div>
-    <div className="step rv" style={{ "--rd": ".3s" }}><div className="no">4</div><h3>Silence releases it</h3><p>Miss the window and a grace period begins. If that passes too, the vault sends each person their share, straight to their wallet.</p></div>
+    <div className="step rv"><div className="no">1</div><h3>Put it in a vault</h3><p>Sign in with your email and deposit the MON, USDC or AUSD you'd want your family to have. It stays yours, and you can take it back out at any time.</p></div>
+    <div className="step rv" style={{ "--rd": ".1s" }}><div className="no">2</div><h3>Name your family</h3><p>Add each person by email or wallet address and set their share. Someone with no wallet gets one made for them, waiting until they sign in.</p></div>
+    <div className="step rv" style={{ "--rd": ".2s" }}><div className="no">3</div><h3>Confirm you're still here</h3><p>Pick how often, from every 30 days to once a year. One tap before the window ends resets the clock. A calendar entry reminds you well ahead.</p></div>
+    <div className="step rv" style={{ "--rd": ".3s" }}><div className="no">4</div><h3>If you can't, they're paid</h3><p>Miss the window and a grace period begins. If that passes too, the vault sends each person their share, straight to their wallet. Nothing to claim, nobody to ask.</p></div>
   </div>
 </div></section>
 
 <section id="trust" style={{ paddingTop: "0" }}><div className="wrap">
-  <div className="head rv"><span className="eyebrow">Safeguards</span><h2>Built so nothing moves by accident.</h2><p>A switch that guards a lifetime of savings has to be hard to trip and impossible to hijack.</p></div>
+  <div className="head rv"><span className="eyebrow">Safeguards</span><h2>Built so nothing moves by accident.</h2><p>Something that guards what you'd leave your family has to be hard to trip and impossible to hijack.</p></div>
   <div className="trust rv" id="trustGrid">
     <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h3>Your keys stay yours</h3><p>The vault is a contract only you control. Legatum Arca never holds your keys and cannot move your funds.</p></div>
     <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>A grace period you set</h3><p>Add one and a missed check-in starts a second countdown. One tap during it cancels the release, so a long trip costs you nothing.</p></div>
@@ -156,21 +170,23 @@ export default function Landing({ onLaunch }) {
 <section id="faq" style={{ paddingTop: "0" }}><div className="wrap faq">
   <div className="head rv"><span className="eyebrow">Questions</span><h2>What people ask before they trust it.</h2></div>
   <div className="rv">
-    <details open><summary>What if I'm fine and I just forget?</summary><p>Your dashboard counts down to the deadline, a calendar entry can alert you before it, and the grace period gives you extra time after it. Checking in at any point before the grace period ends resets everything.</p></details>
+    <details open><summary>What is a dead man's switch?</summary><p>A mechanism that acts when its owner stops responding. Here, the vault waits for you to confirm you're alive. As long as you do, nothing happens. If you stop, because you have died or can no longer reach your wallet, it carries out the instruction you left: pay these people these shares.</p></details>
+    <details><summary>What if I'm fine and I just forget?</summary><p>Your dashboard counts down to the deadline, a calendar entry can alert you before it, and the grace period gives you extra time after it. Checking in at any point before the grace period ends resets everything.</p></details>
     <details><summary>Can my beneficiaries take the funds while I'm alive?</summary><p>No. Nothing can be paid out until both the check-in window and the grace period have passed without a check-in from you.</p></details>
-    <details><summary>Do my beneficiaries need to do anything now?</summary><p>Nothing. They only need access to the wallet address you listed. If the vault releases, their share is sent to that wallet automatically.</p></details>
+    <details><summary>Do my beneficiaries need to do anything now?</summary><p>Nothing. If you named them by email, a wallet is already waiting for them and they only have to sign in with that email. If you named a wallet address, they need access to that wallet. Either way their share arrives automatically.</p></details>
     <details><summary>What happens if I lose access to my wallet?</summary><p>You can no longer check in, so the timer runs out and the vault releases to the people you named. Your funds reach them and are not lost.</p></details>
+    <details><summary>Is this a legal will?</summary><p>No. It is a contract that moves funds on the dates you set, with no court or lawyer involved. It doesn't replace a will, and the software has not been audited, so start with an amount you could afford to lose.</p></details>
   </div>
 </div></section>
 
 <section className="close"><div className="wrap rv">
   <h2 className="grad">Leave instructions,<br />not a locked wallet.</h2>
-  <p>Setting up a vault takes a few minutes. It protects the people you love for as long as you keep it.</p>
-  <div className="cta"><a className="btn solid" href="#demo" onClick={launch}>Create your vault</a></div>
+  <p>Setting up a vault takes a few minutes. If the worst ever happens, it is the difference between your family receiving what you saved and never seeing it.</p>
+  <div className="cta"><a className="btn solid" href="#demo" onClick={launch}>Protect your family</a></div>
 </div></section>
 </main>
 
-<footer><div className="wrap"><span>Legatum Arca · A dead man's switch for on-chain assets</span><span>Unaudited software · not a legal will · figures shown are examples</span></div></footer>
+<footer><div className="wrap"><span>Legatum Arca · On-chain inheritance for the people you'd leave behind</span><span>Unaudited software · not a legal will · figures shown are examples</span></div></footer>
     </div>
   );
 }

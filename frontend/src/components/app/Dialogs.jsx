@@ -174,7 +174,7 @@ export function NewVaultDialog({ onClose, onDone, saveLabels }) {
   return (
     <Modal
       title="New vault"
-      blurb="Deposit, choose a check-in window and name who receives it."
+      blurb="Name who should receive this if something happens to you, and how often you'll confirm you're still here."
       wide={rows.length > 1}
       onClose={onClose}
     >
