@@ -1,5 +1,5 @@
-import { ARC_CONFIG } from "../../config.js";
-import { formatDeadline, formatUsdc, shortAddress } from "./format.js";
+import { CHAIN_CONFIG } from "../../config.js";
+import { formatAssets, formatDeadline, formatDollars, shareOfAssets, shortAddress, stableCents } from "./format.js";
 import { isOpen, vaultName } from "./viewModel.js";
 
 // The boxes the dashboard's pages are assembled from (see Pages.jsx). They
@@ -14,7 +14,8 @@ export function Stats({ totals }) {
           {totals.total}
         </span>
         <small>
-          USDC across <span id="sCount">{totals.count}</span> {totals.count === 1 ? "vault" : "vaults"}
+          in stablecoins, plus {totals.native} MON, across <span id="sCount">{totals.count}</span>{" "}
+          {totals.count === 1 ? "vault" : "vaults"}
         </small>
       </div>
       <hr />
@@ -59,7 +60,7 @@ export function VaultList({ views, selected, onSelect, loading, wide }) {
               <br />
               <span className="ad mono">{shortAddress(x.address)}</span>
             </span>
-            <span className="mono">{x.amount} USDC</span>
+            <span className="mono">{x.amount}</span>
             <span className={`meter ${x.tone}`}>
               <span style={{ color: "var(--mute)" }}>{x.meter}</span>
               <span className="track">
@@ -74,19 +75,25 @@ export function VaultList({ views, selected, onSelect, loading, wide }) {
   );
 }
 
-// Per beneficiary: USDC actually sent to them, and whether a failed transfer
-// is still being held for them.
+// Per beneficiary: what was actually sent to them, asset by asset, and
+// whether a failed transfer is still being held for them.
 function payouts(history) {
   const out = new Map();
   for (const e of history) {
     if (e.action !== "Payout" && e.action !== "PayoutFailed") continue;
-    const entry = out.get(e.actor) ?? { paid: 0n, held: false };
-    if (e.action === "Payout") entry.paid += e.amount;
-    entry.held = e.action === "PayoutFailed";
+    const entry = out.get(e.actor) ?? { paid: new Map(), held: new Set() };
+    if (e.action === "Payout") {
+      entry.paid.set(e.token, (entry.paid.get(e.token) ?? 0n) + e.amount);
+      entry.held.delete(e.token);
+    } else {
+      entry.held.add(e.token);
+    }
     out.set(e.actor, entry);
   }
   return out;
 }
+
+const asAssets = (map) => [...(map ?? [])].map(([token, raw]) => ({ token, raw }));
 
 // One vault's split. `onEdit` and `onViewAll` add the matching button.
 export function People({ vault, labels, heading = "Beneficiaries", onEdit, onViewAll }) {
@@ -112,7 +119,7 @@ export function People({ vault, labels, heading = "Beneficiaries", onEdit, onVie
           <ul className="people" id="peopleList">
             {vault.beneficiaries.map((p) => {
               const name = labels[p.address.toLowerCase()];
-              const share = released ? (paid.get(p.address)?.paid ?? 0n) : (vault.balanceRaw * BigInt(p.bps)) / 10000n;
+              const share = released ? asAssets(paid.get(p.address)?.paid) : shareOfAssets(vault.assets, p.bps);
               return (
                 <li key={p.address}>
                   <span className="av">{(name ?? p.address.slice(2)).charAt(0).toUpperCase()}</span>
@@ -120,13 +127,13 @@ export function People({ vault, labels, heading = "Beneficiaries", onEdit, onVie
                     <b style={{ fontWeight: 500 }}>{name ?? shortAddress(p.address)}</b>
                     <br />
                     <span className="ad mono" title={p.address}>
-                      {paid.get(p.address)?.held ? "Payout held for them" : shortAddress(p.address)}
+                      {paid.get(p.address)?.held.size ? "Payout held for them" : shortAddress(p.address)}
                     </span>
                   </span>
                   <span className="mono" style={{ textAlign: "right" }}>
                     {p.bps / 100}%
                     <br />
-                    <span className="ad">{formatUsdc(share)}</span>
+                    <span className="ad">{formatAssets(share, "–")}</span>
                   </span>
                 </li>
               );
@@ -158,13 +165,18 @@ export function Everyone({ vaults, now, labels }) {
   for (const v of vaults) {
     if (!isOpen(v, now)) continue;
     for (const b of v.beneficiaries) {
-      const entry = people.get(b.address) ?? { address: b.address, total: 0n, shares: [] };
-      entry.total += (v.balanceRaw * BigInt(b.bps)) / 10000n;
+      const entry = people.get(b.address) ?? { address: b.address, assets: new Map(), shares: [] };
+      for (const a of shareOfAssets(v.assets, b.bps)) {
+        entry.assets.set(a.token, (entry.assets.get(a.token) ?? 0n) + a.raw);
+      }
       entry.shares.push(`${b.bps / 100}% of ${vaultName(v)}`);
       people.set(b.address, entry);
     }
   }
-  const named = [...people.values()].sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0));
+  const named = [...people.values()]
+    .map((p) => ({ ...p, assets: asAssets(p.assets) }))
+    .map((p) => ({ ...p, cents: stableCents(p.assets) }))
+    .sort((a, b) => (b.cents > a.cents ? 1 : b.cents < a.cents ? -1 : 0));
 
   return (
     <section className="box span2">
@@ -190,9 +202,9 @@ export function Everyone({ vaults, now, labels }) {
                 <span className="ad">{p.shares.join(" · ")}</span>
               </span>
               <span className="mono" style={{ textAlign: "right" }}>
-                {formatUsdc(p.total)}
+                {formatAssets(p.assets, "–")}
                 <br />
-                <span className="ad">USDC today</span>
+                <span className="ad">today</span>
               </span>
             </li>
           );
@@ -205,14 +217,14 @@ export function Everyone({ vaults, now, labels }) {
 // The selected vault's own numbers, beside its check-in ring.
 export function VaultDetails({ vault }) {
   const created = vault.history.find((e) => e.action === "Created");
-  const explorer = ARC_CONFIG.blockExplorerUrl;
+  const explorer = CHAIN_CONFIG.blockExplorerUrl;
   const count = vault.beneficiaries.length;
   return (
     <section className="box stats" style={{ "--d": ".08s" }} aria-label="Vault details">
       <div className="stat">
         <span className="label">In this vault</span>
-        <span className="v">{formatUsdc(vault.balanceRaw)}</span>
-        <small>USDC</small>
+        <span className="v">{formatDollars(stableCents(vault.assets))}</span>
+        <small>in stablecoins · holds {formatAssets(vault.assets, "nothing yet")}</small>
       </div>
       <hr />
       <div className="stat">
@@ -235,7 +247,7 @@ export function VaultDetails({ vault }) {
         <small>
           {created
             ? `Opened ${new Date(created.timestamp * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
-            : "On " + ARC_CONFIG.label}
+            : "On " + CHAIN_CONFIG.label}
         </small>
       </div>
     </section>

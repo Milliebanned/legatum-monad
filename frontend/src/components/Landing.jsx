@@ -10,7 +10,7 @@ const MARQUEE = [
   "Grace period built in",
   "Change beneficiaries anytime",
   "Withdraw whenever you like",
-  "Settles on Arc",
+  "Settles on Monad",
 ];
 
 // The extruded mark on the middle card: copies of the logo stacked along Z,
@@ -19,7 +19,7 @@ const MARQUEE = [
 const LAYERS = 44;
 const MARK_LAYERS = Array.from({ length: LAYERS }, (_, i) => ({
   transform: `translateZ(${((i - (LAYERS - 1) / 2) * 0.5).toFixed(2)}px)`,
-  color: `hsl(158 ${i === 0 || i === LAYERS - 1 ? "52% 78%" : "40% 26%"})`,
+  color: `hsl(250 ${i === 0 || i === LAYERS - 1 ? "78% 76%" : "48% 30%"})`,
 }));
 
 // The public page. Its calls to action open the wallet dialog; everything
@@ -53,7 +53,7 @@ export default function Landing({ onLaunch }) {
   <div className="aurora"><i className="a1"></i><i className="a2"></i><i className="a3"></i></div>
   <canvas id="stars" aria-hidden="true"></canvas>
   <div className="wrap">
-    <div className="pills"><span className="pill"><b>Built on</b> Arc</span><span className="pill">Non-custodial</span><span className="pill">Stablecoin-native</span></div>
+    <div className="pills"><span className="pill"><b>Built on</b> Monad</span><span className="pill">Non-custodial</span><span className="pill">MON and stablecoins</span></div>
     <h1 className="grad" id="h1">
       {HEADLINE.map((word, i) => (
         <Fragment key={i}>
@@ -62,7 +62,7 @@ export default function Landing({ onLaunch }) {
         </Fragment>
       ))}
     </h1>
-    <p className="sub">Legatum Arca is a dead man's switch for the USDC in your wallet. Create a vault, name the people you trust, and check in on your own schedule. If you ever stop, the vault releases to them.</p>
+    <p className="sub">Legatum Arca is a dead man's switch for the MON and stablecoins in your wallet. Create a vault, name the people you trust, and check in on your own schedule. If you ever stop, the vault releases to them.</p>
     <div className="cta"><a className="btn solid" href="#demo" onClick={launch}>Create your vault</a><a className="btn" href="#how">See how it works</a></div>
 
     <div className="stage" aria-hidden="true">
@@ -134,7 +134,7 @@ export default function Landing({ onLaunch }) {
   <div className="head rv"><span className="eyebrow">How it works</span><h2>Four steps, then you get on with your life.</h2></div>
   <div className="steps">
     <div className="rail"></div>
-    <div className="step rv"><div className="no">1</div><h3>Create a vault</h3><p>Connect your wallet on Arc and deposit the USDC you want protected. It stays yours and you can withdraw at any time.</p></div>
+    <div className="step rv"><div className="no">1</div><h3>Create a vault</h3><p>Connect your wallet on Monad and deposit the MON, USDC or AUSD you want protected. It stays yours and you can withdraw at any time.</p></div>
     <div className="step rv" style={{ "--rd": ".1s" }}><div className="no">2</div><h3>Name your people</h3><p>Add the wallet addresses of family or friends and set each person's share. Split it any way you like.</p></div>
     <div className="step rv" style={{ "--rd": ".2s" }}><div className="no">3</div><h3>Check in</h3><p>Pick a window, from 30 days to a year. One signed tap before it ends resets the clock. A calendar entry reminds you well ahead.</p></div>
     <div className="step rv" style={{ "--rd": ".3s" }}><div className="no">4</div><h3>Silence releases it</h3><p>Miss the window and a grace period begins. If that passes too, the vault sends each person their share, straight to their wallet.</p></div>
@@ -149,7 +149,7 @@ export default function Landing({ onLaunch }) {
     <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><h3>Reminders before the deadline</h3><p>Add a vault's deadline to your calendar and it alerts you 14 days, 7 days and 1 day before your window closes.</p></div>
     <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="9"/></svg><h3>Nobody is paid early</h3><p>Beneficiaries cannot touch a vault while its timer is running. The contract enforces the dates and no one can override it.</p></div>
     <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg><h3>Change your mind anytime</h3><p>Add or remove people, adjust shares, withdraw funds or close the vault. Every change takes one transaction.</p></div>
-    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7Z"/></svg><h3>Made for Arc</h3><p>Fees are paid in stablecoins and transactions settle fast, so a check-in costs cents and a payout lands in seconds once it is sent.</p></div>
+    <div className="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7Z"/></svg><h3>Made for Monad</h3><p>Fees are low and blocks land in under a second, so a check-in costs very little and a payout arrives moments after it is sent.</p></div>
   </div>
 </div></section>
 

@@ -1,15 +1,44 @@
 import { formatUnits } from "ethers";
+import { tokenInfo } from "../../config.js";
 
 // Formatting helpers that turn on-chain values into the strings the dashboard
-// shows ("48,250", "62 of 90 days left", "5 Dec 2026", "0x7A3f…E21c").
+// shows ("48,250 USDC", "62 of 90 days left", "5 Dec 2026", "0x7A3f…E21c").
 
-export const USDC_DECIMALS = 6;
 export const DAY = 86400;
 
-// 48250000000n -> "48,250"; 500000n -> "0.5"
-export function formatUsdc(raw) {
-  return Number(formatUnits(raw, USDC_DECIMALS)).toLocaleString("en-US", { maximumFractionDigits: 2 });
+// 48250000000n at 6 decimals -> "48,250"; 500000n -> "0.5". Amounts under one
+// keep four decimals so a little MON doesn't round to nothing.
+export function formatAmount(raw, decimals) {
+  const value = Number(formatUnits(raw, decimals));
+  return value.toLocaleString("en-US", { maximumFractionDigits: value !== 0 && Math.abs(value) < 1 ? 4 : 2 });
 }
+
+// 48250000000n of USDC -> "48,250 USDC"
+export function formatAsset(raw, tokenAddress) {
+  const token = tokenInfo(tokenAddress);
+  return `${formatAmount(raw, token.decimals)} ${token.symbol}`;
+}
+
+// [{ token, raw }] -> "48,250 USDC · 12 MON", leaving out what's empty.
+export function formatAssets(assets, empty = "Nothing yet") {
+  const held = assets.filter((a) => a.raw > 0n);
+  return held.length ? held.map((a) => formatAsset(a.raw, a.token)).join(" · ") : empty;
+}
+
+// The same list with every amount scaled to a share in basis points.
+export const shareOfAssets = (assets, bps) => assets.map((a) => ({ token: a.token, raw: (a.raw * BigInt(bps)) / 10000n }));
+
+// Dollar value of the stablecoins in a list, in cents, for sorting and totals.
+export function stableCents(assets) {
+  return assets.reduce((sum, a) => {
+    const token = tokenInfo(a.token);
+    return token.stable ? sum + (a.raw * 100n) / 10n ** BigInt(token.decimals) : sum;
+  }, 0n);
+}
+
+// 4825000n cents -> "$48,250"
+export const formatDollars = (cents) =>
+  `$${(Number(cents) / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
@@ -40,4 +69,12 @@ export function shortAddress(address) {
   return address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
 }
 
-export const txError = (err, fallback) => err?.reason ?? err?.shortMessage ?? err?.message ?? fallback;
+// ethers reports an error it doesn't recognise as "could not coalesce
+// error" and keeps what the wallet actually said underneath; show that.
+export const txError = (err, fallback) =>
+  err?.reason ??
+  err?.info?.error?.message ??
+  err?.error?.message ??
+  (err?.shortMessage === "could not coalesce error" ? null : err?.shortMessage) ??
+  err?.message ??
+  fallback;

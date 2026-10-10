@@ -248,7 +248,7 @@ export function EmptyPulse({ loading, onCreate }) {
         {!loading && (
           <>
             <p style={{ color: "var(--mute)" }}>
-              Deposit USDC, name the people you trust and pick how often you'll check in. If you ever stop, the vault
+              Deposit MON or stablecoins, name the people you trust and pick how often you'll check in. If you ever stop, the vault
               pays them.
             </p>
             <div>

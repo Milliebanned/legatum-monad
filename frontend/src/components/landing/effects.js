@@ -46,7 +46,7 @@ export function mountLanding() {
       var s = stars[i];
       if(!reduce){ s.y -= s.v/60; if(s.y<0) s.y = 1; }
       S.x.globalAlpha = .25 + .55*Math.abs(Math.sin(t/1400 + s.p));
-      S.x.fillStyle = '#d3f8e8';
+      S.x.fillStyle = '#dcd5ff';
       S.x.beginPath(); S.x.arc(s.x*S.w, s.y*S.h, s.r, 0, 6.28); S.x.fill();
     }
   }
@@ -59,7 +59,7 @@ export function mountLanding() {
   var heirs = [].slice.call(document.querySelectorAll('.heir'));
   var pct = ['50%','30%','20%'];
   var css = getComputedStyle(document.documentElement);
-  var COL = {ok:css.getPropertyValue('--mint').trim(), warn:css.getPropertyValue('--warn').trim(), alert:css.getPropertyValue('--alert').trim(), hi:css.getPropertyValue('--mint-hi').trim()};
+  var COL = {ok:css.getPropertyValue('--accent').trim(), warn:css.getPropertyValue('--warn').trim(), alert:css.getPropertyValue('--alert').trim(), hi:css.getPropertyValue('--accent-hi').trim()};
 
   function say(msg){
     var li = document.createElement('li'); li.textContent = msg; log.prepend(li);

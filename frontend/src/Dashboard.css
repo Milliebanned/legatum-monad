@@ -2,10 +2,10 @@
    every other block is flat black separated by hairlines, so the one action that matters is the brightest thing on screen. */
 .app{
   color-scheme:dark;
-  --ink:#040706; --ink-2:#08100d; --panel:#0a1310; --raise:#0f1b17;
-  --line:rgba(170,235,210,.12); --line-2:rgba(170,235,210,.26);
-  --mint:#8fd9bd; --mint-hi:#d3f8e8; --mint-deep:#2c6453; --glow:rgba(124,208,176,.4);
-  --fg:#e8f3ee; --mute:#8ba59b; --warn:#ecc77f; --alert:#f09683;
+  --ink:#06040d; --ink-2:#0b0817; --panel:#0f0a1e; --raise:#181031;
+  --line:rgba(168,150,255,.12); --line-2:rgba(168,150,255,.26);
+  --accent:#836ef9; --accent-hi:#dcd5ff; --accent-deep:#3a2a8f; --glow:rgba(131,110,249,.4);
+  --fg:#f3f0fd; --mute:#a29bbf; --warn:#ecc77f; --alert:#f2776a;
   --display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
   --body:"Onest","Helvetica Neue",Arial,sans-serif;
   --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -18,22 +18,22 @@
 .app a{color:inherit;text-decoration:none}
 .app h1,.app h2,.app h3{font-family:var(--display);font-weight:500;letter-spacing:-.025em;margin:0;line-height:1.1}
 .app p{margin:0}
-.app :focus-visible{outline:2px solid var(--mint-hi);outline-offset:2px;border-radius:8px}
+.app :focus-visible{outline:2px solid var(--accent-hi);outline-offset:2px;border-radius:8px}
 .app .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .app .label{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mute)}
 
 .app .shell{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100vh}
 .app .rail{position:sticky;top:0;align-self:start;height:100vh;display:flex;flex-direction:column;gap:28px;padding:22px 16px;border-right:1px solid var(--line);background:var(--ink-2)}
 .app .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);letter-spacing:.14em;text-transform:uppercase;font-size:14px;padding-inline:8px;white-space:nowrap}
-.app .brand svg{width:22px;height:22px;flex:none;color:var(--mint)}
+.app .brand svg{width:22px;height:22px;flex:none;color:var(--accent)}
 .app .nav{display:grid;gap:4px}
 .app .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:var(--mute);transition:background .2s,color .2s}
-.app .nav a:hover{background:rgba(143,217,189,.07);color:var(--fg)}
-.app .nav a.on{background:rgba(143,217,189,.12);color:var(--mint-hi)}
+.app .nav a:hover{background:rgba(131,110,249,.07);color:var(--fg)}
+.app .nav a.on{background:rgba(131,110,249,.12);color:var(--accent-hi)}
 .app .nav svg{width:17px;height:17px;flex:none}
 .app .wallet{margin-top:auto;border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:4px}
 .app .wallet b{font-weight:500}
-.app .net{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mint)}
+.app .net{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent)}
 .app .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:d-ping 2s infinite}
 @keyframes d-ping{from{box-shadow:0 0 0 0 currentColor}to{box-shadow:0 0 0 8px transparent}}
 
@@ -41,10 +41,10 @@
 .app .top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
 .app .top h1{font-size:clamp(24px,3vw,32px)}
 .app .top p{color:var(--mute)}
-.app .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:11px;border:1px solid var(--line-2);background:rgba(143,217,189,.07);font-weight:500;font-size:14px;transition:transform .2s,background .2s,border-color .2s}
-.app .btn:hover{transform:translateY(-1px);background:rgba(143,217,189,.15);border-color:var(--mint)}
-.app .btn.solid{background:var(--mint);border-color:var(--mint);color:#04120d}
-.app .btn.solid:hover{background:var(--mint-hi)}
+.app .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:11px;border:1px solid var(--line-2);background:rgba(131,110,249,.07);font-weight:500;font-size:14px;transition:transform .2s,background .2s,border-color .2s}
+.app .btn:hover{transform:translateY(-1px);background:rgba(131,110,249,.15);border-color:var(--accent)}
+.app .btn.solid{background:var(--accent);border-color:var(--accent);color:#ffffff}
+.app .btn.solid:hover{background:var(--accent-hi)}
 .app .btn.big{padding:14px 26px;font-size:15px}
 
 .app .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
@@ -74,7 +74,7 @@
 .app .facts b{font-weight:500}
 .app #ecg{width:100%;height:54px;display:block}
 .app .pill{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
-.app .ok{color:var(--mint)}.app .warn{color:var(--warn)}.app .alert{color:var(--alert)}
+.app .ok{color:var(--accent)}.app .warn{color:var(--warn)}.app .alert{color:var(--alert)}
 
 /* stats */
 .app .stats{display:grid;gap:18px}
@@ -85,21 +85,21 @@
 
 /* vault rows */
 .app .vault{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.2fr) auto;gap:8px 16px;align-items:center;width:100%;text-align:left;padding:14px 12px;border:0;border-top:1px solid var(--line);background:none;border-radius:0;transition:background .2s}
-.app .vault:hover{background:rgba(143,217,189,.05)}
-.app .vault.sel{background:rgba(143,217,189,.09);box-shadow:inset 2px 0 0 var(--mint)}
+.app .vault:hover{background:rgba(131,110,249,.05)}
+.app .vault.sel{background:rgba(131,110,249,.09);box-shadow:inset 2px 0 0 var(--accent)}
 .app .vault .nm{font-weight:500}
 .app .vault .ad{font-size:12px;color:var(--mute)}
 .app .meter{display:grid;gap:5px;font-size:12px;color:var(--mute)}
-.app .track{height:4px;border-radius:4px;background:rgba(170,235,210,.1);overflow:hidden}
+.app .track{height:4px;border-radius:4px;background:rgba(168,150,255,.1);overflow:hidden}
 .app .track i{display:block;height:100%;border-radius:4px;background:currentColor;transition:width 1s cubic-bezier(.2,.8,.2,1)}
 
 /* people */
 .app .split{display:flex;height:10px;border-radius:10px;overflow:hidden;gap:2px;margin-bottom:16px}
-.app .split i{background:var(--mint);transition:flex-basis .8s}
-.app .split i:nth-child(2){background:#5aa88d}.app .split i:nth-child(3){background:var(--mint-deep)}
+.app .split i{background:var(--accent);transition:flex-basis .8s}
+.app .split i:nth-child(2){background:#6a56d6}.app .split i:nth-child(3){background:var(--accent-deep)}
 .app .people{display:grid;gap:12px;list-style:none;margin:0;padding:0}
 .app .people li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
-.app .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--raise);border:1px solid var(--line-2);font-family:var(--display);color:var(--mint)}
+.app .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--raise);border:1px solid var(--line-2);font-family:var(--display);color:var(--accent)}
 .app .people .ad{font-size:12px;color:var(--mute)}
 .app .empty{color:var(--mute);font-size:14px}
 
@@ -108,7 +108,7 @@
 .app .acts li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:11px 0;border-top:1px solid var(--line);align-items:baseline}
 .app .acts li:first-child{border-top:0;padding-top:0}
 .app .acts li.new{animation:d-up .5s backwards}
-.app .acts .ic{width:8px;height:8px;border-radius:50%;background:var(--mint);align-self:center}
+.app .acts .ic{width:8px;height:8px;border-radius:50%;background:var(--accent);align-self:center}
 .app .acts .ic.r{background:var(--warn)}.app .acts .ic.d{background:var(--mute)}
 .app .acts time{font-size:12px;color:var(--mute);white-space:nowrap}
 
@@ -116,25 +116,25 @@
 .app .sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
 .app .sw:first-of-type{border-top:0;padding-top:0}
 .app .sw small{display:block;color:var(--mute);font-size:12px}
-.app .sw input{appearance:none;-webkit-appearance:none;width:40px;height:22px;border-radius:22px;background:rgba(170,235,210,.14);position:relative;cursor:pointer;transition:background .25s;flex:none;margin:0}
+.app .sw input{appearance:none;-webkit-appearance:none;width:40px;height:22px;border-radius:22px;background:rgba(168,150,255,.14);position:relative;cursor:pointer;transition:background .25s;flex:none;margin:0}
 .app .sw input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--mute);transition:transform .25s,background .25s}
-.app .sw input:checked{background:var(--mint-deep)}
-.app .sw input:checked::after{transform:translateX(18px);background:var(--mint-hi)}
+.app .sw input:checked{background:var(--accent-deep)}
+.app .sw input:checked::after{transform:translateX(18px);background:var(--accent-hi)}
 .app .lead{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 .app .lead span{font-size:12px;padding:5px 10px;border-radius:8px;background:var(--raise);border:1px solid var(--line)}
 
 /* dialog + toast */
 .app dialog{border:1px solid var(--line-2);border-radius:20px;background:var(--panel);color:var(--fg);padding:26px;width:min(440px,calc(100% - 32px))}
-.app dialog::backdrop{background:rgba(2,5,4,.7);backdrop-filter:blur(6px)}
+.app dialog::backdrop{background:rgba(4,3,10,.7);backdrop-filter:blur(6px)}
 .app dialog[open]{animation:d-up .35s cubic-bezier(.2,.8,.2,1)}
 .app dialog h2{font-size:24px;margin-bottom:6px}
 .app dialog form{display:grid;gap:14px;margin-top:18px}
 .app .f{display:grid;gap:6px}
 .app .f input,.app .f select{background:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;width:100%}
-.app .f input:focus,.app .f select:focus{outline:none;border-color:var(--mint)}
+.app .f input:focus,.app .f select:focus{outline:none;border-color:var(--accent)}
 .app .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .app .acts2{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
-.app #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--mint);color:#04120d;font-weight:500;padding:11px 20px;border-radius:12px;transform:translateY(80px);opacity:0;transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s;pointer-events:none;z-index:50;max-width:calc(100% - 32px)}
+.app #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--accent);color:#ffffff;font-weight:500;padding:11px 20px;border-radius:12px;transform:translateY(80px);opacity:0;transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s;pointer-events:none;z-index:50;max-width:calc(100% - 32px)}
 .app #toast.show{transform:none;opacity:1}
 .app .note{color:var(--mute);font-size:12px;text-align:center}
 
@@ -156,10 +156,10 @@
 /* ---- Beyond the drawn dashboard: the controls a live vault needs ---- */
 .app .off{color:var(--mute)}
 .app .btn[disabled]{opacity:.45;pointer-events:none}
-.app .btn.danger{color:var(--alert);border-color:rgba(240,150,131,.4);background:rgba(240,150,131,.07)}
-.app .btn.danger:hover{border-color:var(--alert);background:rgba(240,150,131,.15)}
-.app .link{background:none;border:0;padding:0;color:var(--mint);font-size:13px}
-.app .link:hover{color:var(--mint-hi)}
+.app .btn.danger{color:var(--alert);border-color:rgba(242,119,106,.4);background:rgba(242,119,106,.07)}
+.app .btn.danger:hover{border-color:var(--alert);background:rgba(242,119,106,.15)}
+.app .link{background:none;border:0;padding:0;color:var(--accent);font-size:13px}
+.app .link:hover{color:var(--accent-hi)}
 .app .hint{color:var(--mute);font-size:12px}
 .app .err{color:var(--alert);font-size:12px}
 .app .full{grid-column:1/-1}
@@ -167,12 +167,12 @@
 
 /* the rail's wallet box opens the account dialog */
 .app .wallet{width:100%;text-align:left;background:none;transition:border-color .2s,background .2s}
-.app .wallet:hover{border-color:var(--line-2);background:rgba(143,217,189,.05)}
+.app .wallet:hover{border-color:var(--line-2);background:rgba(131,110,249,.05)}
 
 .app .nav .acct{display:none}
 .app .pick{background:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:7px 10px;font-size:13px;max-width:55%}
-.app .pick:focus{outline:none;border-color:var(--mint)}
-.app .stat .v a:hover{color:var(--mint-hi)}
+.app .pick:focus{outline:none;border-color:var(--accent)}
+.app .stat .v a:hover{color:var(--accent-hi)}
 
 /* check-in panel */
 .app .go,.app .manage{display:flex;flex-wrap:wrap;gap:10px}
@@ -197,7 +197,7 @@
 .app .split-foot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:13px}
 .app .split-foot .mono{margin-left:auto}
 .app .check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--mute)}
-.app .check input{margin:3px 0 0;accent-color:var(--mint);flex:none}
+.app .check input{margin:3px 0 0;accent-color:var(--accent);flex:none}
 .app .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .app .kv:first-child{border-top:0;padding-top:0}
 .app #toast.bad{background:var(--alert)}
@@ -212,3 +212,19 @@
   .app .prow{grid-template-columns:minmax(0,1fr) 74px 38px}
   .app .prow > .f:first-child{grid-column:1/-1}
 }
+
+/* Send page: the same field spacing as a dialog's form. */
+.app .sendform{display:grid;gap:14px}
+.app .wallet b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Monad look: one flat purple on near-black, a faint dotted grid behind
+   everything, and panels with one squared corner. */
+.app{background:radial-gradient(900px 520px at 88% -8%,rgba(131,110,249,.13),transparent 62%),radial-gradient(rgba(168,150,255,.08) 1px,transparent 1.6px) 0 0/22px 22px,var(--ink);background-attachment:fixed}
+.app .rail{background:rgba(11,8,23,.74);backdrop-filter:blur(14px)}
+.app .nav a.on{box-shadow:inset 2px 0 0 var(--accent)}
+.app .box{position:relative;border-radius:22px 22px 22px 5px;background:linear-gradient(180deg,rgba(24,16,49,.9),rgba(14,9,28,.9))}
+.app .box::after{content:"";position:absolute;left:24px;top:-1px;width:46px;height:2px;border-radius:2px;background:var(--accent);pointer-events:none}
+.app .btn.solid,.app #toast{font-weight:600}
+.app .btn.solid:hover{background:#9b89ff;border-color:#9b89ff}
+.app #toast.bad{background:var(--alert);color:#2a0a06}
+.app dialog{border-radius:22px 22px 22px 5px;background:linear-gradient(180deg,#191033,#0f0a1e)}

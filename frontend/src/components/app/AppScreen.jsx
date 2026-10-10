@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWeb3 } from "../../Web3Context.jsx";
-import { ARC_CONFIG } from "../../config.js";
+import { CHAIN_CONFIG } from "../../config.js";
 import {
   AccountDialog,
   BeneficiariesDialog,
@@ -11,6 +11,9 @@ import {
 } from "./Dialogs.jsx";
 import { ActivityLog, Beneficiaries, Overview, PAGES, RemindersPage, Vaults } from "./Pages.jsx";
 import { shortAddress } from "./format.js";
+import Send from "./Send.jsx";
+import Swap from "./Swap.jsx";
+import Wallet from "./Wallet.jsx";
 import { useDisplayName, usePeople } from "./people.js";
 import { useNow, useOwnerVaults } from "./useVaults.js";
 import { headline, sortVaults, vaultView } from "./viewModel.js";
@@ -51,6 +54,18 @@ const NAV = [
       </>
     ),
   },
+  {
+    id: "wallet",
+    label: "Wallet",
+    icon: (
+      <>
+        <rect x="3" y="6" width="18" height="13" rx="2.5" />
+        <path d="M16 12.500h2M3 10h18" />
+      </>
+    ),
+  },
+  { id: "swap", label: "Swap", icon: <path d="M7 4v15M7 4 3.500 7.500M7 4l3.500 3.500M17 20V5M17 20l-3.500-3.500M17 20l3.500-3.500" /> },
+  { id: "send", label: "Send", icon: <path d="M4 12h15M13 6l6 6-6 6" /> },
   { id: "activity", label: "Activity", icon: <path d="M3 12h4l3-8 4 16 3-8h4" /> },
   {
     id: "reminders",
@@ -88,7 +103,16 @@ function usePage() {
   return [page, go];
 }
 
-const VIEW = { overview: Overview, vaults: Vaults, people: Beneficiaries, activity: ActivityLog, reminders: RemindersPage };
+const VIEW = {
+  overview: Overview,
+  vaults: Vaults,
+  people: Beneficiaries,
+  wallet: Wallet,
+  swap: Swap,
+  send: Send,
+  activity: ActivityLog,
+  reminders: RemindersPage,
+};
 
 // One message at a time, slid up from the bottom edge, gone after a moment.
 function useToast() {
@@ -104,7 +128,7 @@ function useToast() {
 }
 
 // The connected app: a fixed rail, and beside it the page the rail selects.
-export default function AppScreen({ onDisconnect }) {
+export default function AppScreen({ onDisconnect, email }) {
   const { address, refreshBalance } = useWeb3();
   const { vaults, error, reload } = useOwnerVaults();
   const now = useNow();
@@ -139,6 +163,7 @@ export default function AppScreen({ onDisconnect }) {
     vault,
     now,
     labels,
+    email,
     loading: loading && !error,
     select: setSelected,
     open: setDialog,
@@ -186,11 +211,13 @@ export default function AppScreen({ onDisconnect }) {
             </a>
           </nav>
           <button className="wallet" type="button" onClick={() => setDialog("account")} aria-label="Account">
-            <span className="label">Connected wallet</span>
-            <b className="mono">{shortAddress(address)}</b>
+            <span className="label">{email ? "Signed in" : "Connected wallet"}</span>
+            <b className={email ? undefined : "mono"} title={address}>
+              {email ?? shortAddress(address)}
+            </b>
             <span className="net">
               <i className="dot"></i>
-              {ARC_CONFIG.label === "Arc" ? "Arc network" : ARC_CONFIG.label}
+              {CHAIN_CONFIG.label}
             </span>
           </button>
         </aside>
@@ -223,6 +250,7 @@ export default function AppScreen({ onDisconnect }) {
           displayName={displayName}
           onDisplayName={setDisplayName}
           onDisconnect={onDisconnect}
+          email={email}
           onClose={close}
         />
       )}

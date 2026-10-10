@@ -1,5 +1,5 @@
 export const VAULT_FACTORY_ABI = [
-  "function createVault(string name, address[] beneficiaries, uint256[] shares, uint256 checkInInterval, uint256 gracePeriod) external returns (address)",
+  "function createVault(string name, address[] beneficiaries, uint256[] shares, uint256 checkInInterval, uint256 gracePeriod) external payable returns (address)",
   "function getVaultsByOwner(address owner) view returns (address[])",
   "function getVaultsByBeneficiary(address beneficiary) view returns (address[])",
   "function isVault(address) view returns (bool)",

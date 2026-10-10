@@ -1,18 +1,21 @@
 {
-  "name": "legatumarca-frontend",
+  "name": "legatum-monad-frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:local": "VITE_ARC_TARGET=local vite",
+    "dev:local": "VITE_TARGET=local vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@privy-io/react-auth": "^3.48.1",
     "ethers": "^6.13.0",
+    "jose": "^4.15.9",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "viem": "^2.56.5"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

@@ -11,6 +11,9 @@ export const PAGES = {
   overview: { title: null, blurb: null },
   vaults: { title: "Vaults", blurb: "Check in, move funds in or out, and close a vault." },
   people: { title: "Beneficiaries", blurb: "Who each vault pays, and the vaults that pay you." },
+  wallet: { title: "Wallet", blurb: "What you hold outside your vaults, and how to add to it." },
+  swap: { title: "Swap", blurb: "Trade one Monad asset for another before you lock it away." },
+  send: { title: "Send", blurb: "Pay someone now, in MON or a stablecoin, without waiting for a vault." },
   activity: { title: "Activity", blurb: "Everything recorded on-chain across your vaults." },
   reminders: { title: "Reminders", blurb: "The next deadline for every open vault, ready for your calendar." },
 };

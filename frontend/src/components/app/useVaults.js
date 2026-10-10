@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { Contract } from "ethers";
 import { useWeb3 } from "../../Web3Context.jsx";
-import { ARC_CONFIG } from "../../config.js";
+import { CHAIN_CONFIG } from "../../config.js";
 import { VAULT_FACTORY_ABI } from "../../abis/VaultFactory.js";
 import { VAULT_ABI, VAULT_STATE, VAULT_ACTION } from "../../abis/Vault.js";
 
 // Everything the owner-side screens need about one vault, read in one pass.
 export async function loadVault(address, provider) {
   const vault = new Contract(address, VAULT_ABI, provider);
-  const [name, state, [beneficiaries, shares], balance, interval, grace, lastCheckIn, historyLength] =
+  const [name, state, [beneficiaries, shares], [tokens, balances], interval, grace, lastCheckIn, historyLength] =
     await Promise.all([
       vault.name(),
       vault.state(),
       vault.getBeneficiaries(),
-      vault.balance(),
+      vault.getBalances(),
       vault.checkInInterval(),
       vault.gracePeriod(),
       vault.lastCheckInTime(),
@@ -24,7 +24,8 @@ export async function loadVault(address, provider) {
     address,
     name,
     storedState: VAULT_STATE[Number(state)],
-    balanceRaw: balance,
+    // MON first, then each token the owner has deposited.
+    assets: tokens.map((token, i) => ({ token, raw: balances[i] })),
     beneficiaries: beneficiaries.map((b, i) => ({ address: b, bps: Number(shares[i]) })),
     interval: Number(interval),
     grace: Number(grace),
@@ -33,6 +34,7 @@ export async function loadVault(address, provider) {
       action: VAULT_ACTION[Number(e.action)],
       timestamp: Number(e.timestamp),
       actor: e.actor,
+      token: e.token,
       amount: e.amount,
       index,
     })),
@@ -48,7 +50,7 @@ export function useOwnerVaults() {
   const reload = useCallback(async () => {
     if (!provider || !address) return;
     try {
-      const factory = new Contract(ARC_CONFIG.factoryAddress, VAULT_FACTORY_ABI, provider);
+      const factory = new Contract(CHAIN_CONFIG.factoryAddress, VAULT_FACTORY_ABI, provider);
       const addresses = await factory.getVaultsByOwner(address);
       // One vault that fails to load drops out rather than blanking the page.
       const results = await Promise.allSettled(addresses.map((a) => loadVault(a, provider)));

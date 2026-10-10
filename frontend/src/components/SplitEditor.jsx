@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { isAddress } from "ethers";
+import { looksLikeEmail, resolveEmail } from "../privy.jsx";
 import { TOTAL_SHARES, MAX_BENEFICIARIES } from "../abis/Vault.js";
 
-// Beneficiary rows (name, wallet, percentage) with the contract's rules
-// checked client-side. Used when creating a vault and when editing its
+// Beneficiary rows (name, wallet or email, percentage) with the contract's
+// rules checked client-side. A row given an email keeps it in `email` and gets
+// its `address` from Privy once the field is left. Used when creating a vault and when editing its
 // beneficiaries. One person always gets 100%, so the share column only
 // appears once there are two.
 
@@ -50,11 +53,40 @@ export function validateSplit(rows, ownerAddress) {
   };
 }
 
+// What to remember each row's address as: the name given, or failing that
+// the email it was found by.
+export const labelRows = (rows) => rows.map((r) => ({ address: r.address, name: r.name || r.email || "" }));
+
 export default function SplitEditor({ rows, onChange, ownerAddress }) {
   const { errors, totalBps } = validateSplit(rows, ownerAddress);
   const many = rows.length > 1;
+  // Row index -> "Looking up…" or what went wrong, while an email is resolved.
+  const [lookup, setLookup] = useState({});
 
   const update = (i, field, value) => onChange(rows.map((r, j) => (j === i ? { ...r, [field]: value } : r)));
+
+  // Typing an email clears the address until it has been looked up.
+  const setWho = (i, value) => {
+    const text = value.trim();
+    const email = resolveEmail && text.includes("@");
+    onChange(rows.map((r, j) => (j === i ? { ...r, email: email ? text : undefined, address: email ? "" : text } : r)));
+    setLookup((prev) => ({ ...prev, [i]: undefined }));
+  };
+
+  const resolve = async (i) => {
+    const email = rows[i].email;
+    if (!email || rows[i].address) return;
+    if (!looksLikeEmail(email)) return setLookup((prev) => ({ ...prev, [i]: "Not a valid email address." }));
+    setLookup((prev) => ({ ...prev, [i]: "Looking up…" }));
+    try {
+      const found = await resolveEmail(email);
+      // The rows may have changed while this was in flight.
+      onChange((current) => current.map((r) => (r.email === email ? { ...r, address: found.address, isNew: found.isNew } : r)));
+      setLookup((prev) => ({ ...prev, [i]: undefined }));
+    } catch (err) {
+      setLookup((prev) => ({ ...prev, [i]: err.message }));
+    }
+  };
   const add = () => onChange(evenly([...rows, emptyRow()]));
   const remove = (i) => {
     const next = rows.filter((_, j) => j !== i);
@@ -80,15 +112,16 @@ export default function SplitEditor({ rows, onChange, ownerAddress }) {
             </div>
             <div className="f">
               <label className="label" htmlFor={`ben-addr-${i}`}>
-                Their wallet
+                {resolveEmail ? "Their email or wallet" : "Their wallet"}
               </label>
               <input
                 id={`ben-addr-${i}`}
-                className="mono"
+                className={r.email ? undefined : "mono"}
                 required
-                placeholder="0x…"
-                value={r.address}
-                onChange={(e) => update(i, "address", e.target.value.trim())}
+                placeholder={resolveEmail ? "amara@example.com or 0x…" : "0x…"}
+                value={r.email ?? r.address}
+                onChange={(e) => setWho(i, e.target.value)}
+                onBlur={() => resolve(i)}
               />
             </div>
             {many && (
@@ -113,6 +146,17 @@ export default function SplitEditor({ rows, onChange, ownerAddress }) {
             )}
           </div>
           {errors[i] && <p className="err">{errors[i]}</p>}
+          {lookup[i] && <p className={lookup[i] === "Looking up…" ? "hint" : "err"}>{lookup[i]}</p>}
+          {r.email && r.address && (
+            <p className="hint">
+              {r.isNew
+                ? `A wallet has been made for ${r.email}. It's theirs when they sign in with that email.`
+                : `${r.email} already has a wallet here.`}{" "}
+              <span className="mono" title={r.address}>
+                {r.address.slice(0, 6)}…{r.address.slice(-4)}
+              </span>
+            </p>
+          )}
         </div>
       ))}
       <div className="split-foot">

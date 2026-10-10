@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useWeb3 } from "../Web3Context.jsx";
 import { useEip6963Providers } from "../eip6963.js";
-import { ARC_CONFIG, IS_LOCAL_DEV } from "../config.js";
+import { CHAIN_CONFIG, IS_LOCAL_DEV } from "../config.js";
 import "../ConnectModal.css";
 
 function Mark() {
@@ -25,7 +25,7 @@ function ChevronRight() {
 }
 
 export default function ConnectModal({ onClose }) {
-  const { address, chainId, wrongChain, contractsMissing, error, connect, addArcNetwork } = useWeb3();
+  const { address, chainId, wrongChain, contractsMissing, error, connect, switchNetwork } = useWeb3();
   const wallets = useEip6963Providers();
   const dialogRef = useRef(null);
 
@@ -48,13 +48,13 @@ export default function ConnectModal({ onClose }) {
   const wrongNode = Boolean(address) && !wrongChain && contractsMissing;
 
   let title = "Connect your wallet";
-  let blurb = `Choose a wallet to open your vault on ${ARC_CONFIG.label}.`;
+  let blurb = `Choose a wallet to open your vault on ${CHAIN_CONFIG.label}.`;
   if (needsNetwork) {
     title = "Wrong network";
-    blurb = `Legatum Arca runs on ${ARC_CONFIG.label} (chain ${ARC_CONFIG.chainId}). Your wallet is on chain ${chainId}.`;
+    blurb = `Legatum Arca runs on ${CHAIN_CONFIG.label} (chain ${CHAIN_CONFIG.chainId}). Your wallet is on chain ${chainId}.`;
   } else if (wrongNode) {
     title = "Contracts not found";
-    blurb = `Your wallet is on chain ${ARC_CONFIG.chainId}, but no Legatum Arca factory exists at the configured address.`;
+    blurb = `Your wallet is on chain ${CHAIN_CONFIG.chainId}, but no Legatum Arca factory exists at the configured address.`;
   }
 
   return (
@@ -80,9 +80,9 @@ export default function ConnectModal({ onClose }) {
           <div className="cm-warning">
             {IS_LOCAL_DEV ? (
               <>
-                Chain {ARC_CONFIG.chainId} is Arc mainnet's chain ID, and the local Hardhat node reuses it. Your wallet's
-                network for {ARC_CONFIG.chainId} is pointing at Arc mainnet instead of <code>{ARC_CONFIG.rpcUrl}</code>.
-                Repoint it before signing anything — otherwise these are real mainnet transactions.
+                Chain {CHAIN_CONFIG.chainId} is Monad testnet's chain ID, and the local Hardhat node reuses it. Your
+                wallet's network for {CHAIN_CONFIG.chainId} is pointing at Monad testnet instead of{" "}
+                <code>{CHAIN_CONFIG.rpcUrl}</code>. Repoint it before signing anything.
               </>
             ) : (
               <>The factory address in this build has no contract deployed at it. Nothing can be signed safely yet.</>
@@ -91,8 +91,8 @@ export default function ConnectModal({ onClose }) {
         )}
 
         {needsNetwork && (
-          <button type="button" className="cm-primary" onClick={addArcNetwork}>
-            Switch to {ARC_CONFIG.label}
+          <button type="button" className="cm-primary" onClick={switchNetwork}>
+            Switch to {CHAIN_CONFIG.label}
           </button>
         )}
 

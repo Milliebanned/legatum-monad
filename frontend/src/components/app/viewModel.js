@@ -1,4 +1,16 @@
-import { DAY, formatAgo, formatDeadline, formatSpan, formatUsdc, shortAddress } from "./format.js";
+import { NATIVE } from "../../config.js";
+import {
+  DAY,
+  formatAgo,
+  formatAmount,
+  formatAsset,
+  formatAssets,
+  formatDeadline,
+  formatDollars,
+  formatSpan,
+  shortAddress,
+  stableCents,
+} from "./format.js";
 
 // Turns loaded vaults (see useVaults.js) into what the dashboard renders.
 // Kept free of React and chain calls so it can be fed fixtures.
@@ -92,7 +104,7 @@ export function vaultView(v, now) {
     caption,
     fill: Math.max(0, Math.min(1, fill)),
     meter,
-    amount: formatUsdc(v.balanceRaw),
+    amount: formatAssets(v.assets, "Empty"),
     due: live ? formatDeadline(v.lastCheckIn + v.interval + (p === "grace" ? v.grace : 0), now) : "–",
     window: formatSpan(v.interval),
     grace: v.grace > 0 ? formatSpan(v.grace) : "None",
@@ -128,7 +140,12 @@ export function totals(vaults, now) {
   const next = timed[0];
   const named = new Set(open.flatMap((v) => v.beneficiaries.map((b) => b.address.toLowerCase())));
   return {
-    total: formatUsdc(vaults.reduce((sum, v) => sum + v.balanceRaw, 0n)),
+    // Stablecoins count as dollars; MON is reported beside them, not priced.
+    total: formatDollars(open.reduce((sum, v) => sum + stableCents(v.assets), 0n)),
+    native: formatAmount(
+      open.reduce((sum, v) => sum + (v.assets.find((a) => a.token === NATIVE)?.raw ?? 0n), 0n),
+      18
+    ),
     count: open.length,
     next: !next ? "–" : windowLeft(next, now) > 0 ? formatSpan(windowLeft(next, now)) : "Overdue",
     nextName: next ? vaultName(next) : "No open vaults",
@@ -145,7 +162,7 @@ export function activityItems(vaults, now, labels = {}) {
     const name = vaultName(v);
     const first = v.history.find((e) => e.action === "BeneficiariesSet");
     for (const e of v.history) {
-      const amount = `${formatUsdc(e.amount)} USDC`;
+      const amount = formatAsset(e.amount, e.token);
       const line = {
         Created: ["d", `Created ${name}`],
         BeneficiariesSet:
@@ -157,9 +174,12 @@ export function activityItems(vaults, now, labels = {}) {
         CheckIn: ["c", `Checked in to ${name}`],
         Payout: ["r", `${name} paid ${amount} to ${who(e.actor)}`],
         PayoutFailed: ["r", `${name} is holding ${amount} for ${who(e.actor)}`],
-        Cancel: ["d", `Closed ${name}`],
+        Cancel: ["d", e.amount > 0n ? `Closed ${name}, ${amount} returned` : `Closed ${name}`],
       }[e.action];
       if (!line) continue;
+      // Closing a vault records one entry per asset; an empty one says nothing
+      // unless it is the only sign the vault was closed.
+      if (e.action === "Cancel" && e.amount === 0n && v.history.some((o) => o.action === "Cancel" && o.amount > 0n)) continue;
       items.push({
         key: `${v.address}-${e.index}`,
         timestamp: e.timestamp,

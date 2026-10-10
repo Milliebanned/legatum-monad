@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Contract } from "ethers";
 import { useWeb3 } from "../../Web3Context.jsx";
-import { ARC_CONFIG } from "../../config.js";
+import { CHAIN_CONFIG } from "../../config.js";
 import { VAULT_FACTORY_ABI } from "../../abis/VaultFactory.js";
 import { VAULT_ABI, VAULT_STATE, VAULT_ACTION } from "../../abis/Vault.js";
-import { formatSpan, formatUsdc, shortAddress, txError } from "./format.js";
+import { formatAssets, formatSpan, shortAddress, txError } from "./format.js";
 
 // Vaults that name the connected wallet. Payouts arrive in the wallet
 // automatically when a vault's timer runs out, so there's nothing to claim;
@@ -19,7 +19,7 @@ function useIncomingVaults() {
 
   const load = useCallback(async () => {
     if (!provider || !address) return;
-    const factory = new Contract(ARC_CONFIG.factoryAddress, VAULT_FACTORY_ABI, provider);
+    const factory = new Contract(CHAIN_CONFIG.factoryAddress, VAULT_FACTORY_ABI, provider);
     const listed = await factory.getVaultsByBeneficiary(address);
     // Anyone can name this wallet in as many vaults as they like, so only the
     // newest are read. Payouts never depend on this list: they arrive in the
@@ -31,16 +31,23 @@ function useIncomingVaults() {
     const settled = await Promise.allSettled(
       addrs.map(async (vAddr) => {
         const vault = new Contract(vAddr, VAULT_ABI, provider);
-        const [name, owner, state, share, value, owed, timeLeft, historyLength] = await Promise.all([
+        const [name, owner, state, share, [tokens], timeLeft, historyLength] = await Promise.all([
           vault.name(),
           vault.owner(),
           vault.getVaultState(),
           vault.shareOf(address),
-          vault.shareValue(address),
-          vault.owed(address),
+          vault.getBalances(),
           vault.timeUntilDeadline(),
           vault.historyLength(),
         ]);
+        // Per asset: this wallet's share today, and anything held for it.
+        const perToken = await Promise.all(
+          tokens.map(async (token) => {
+            const [value, owed] = await Promise.all([vault.shareValue(token, address), vault.owed(token, address)]);
+            return { token, value, owed };
+          })
+        );
+        const some = (field) => perToken.filter((t) => t[field] > 0n).map((t) => ({ token: t.token, raw: t[field] }));
         // Recent history is enough to find this wallet's payouts, and keeps a
         // vault with an enormous history from stalling the page.
         const from = historyLength > 50n ? historyLength - 50n : 0n;
@@ -48,16 +55,18 @@ function useIncomingVaults() {
         const mine = history.filter(
           (e) => VAULT_ACTION[Number(e.action)] === "Payout" && e.actor.toLowerCase() === address.toLowerCase()
         );
+        const received = new Map();
+        for (const e of mine) received.set(e.token, (received.get(e.token) ?? 0n) + e.amount);
         return {
           vAddr,
           name,
           owner,
           state: VAULT_STATE[Number(state)],
           bps: Number(share),
-          value,
-          owed,
+          value: some("value"),
+          owed: some("owed"),
           timeLeft: Number(timeLeft),
-          received: mine.reduce((sum, e) => sum + e.amount, 0n),
+          received: [...received].map(([token, raw]) => ({ token, raw })),
         };
       })
     );
@@ -66,8 +75,10 @@ function useIncomingVaults() {
     // or owe it. That drops vaults whose owner later removed it (the factory
     // keeps listing those) and empty vaults anyone could create naming it,
     // so a stranger can't fill this list, or push a misleading vault name
-    // at a beneficiary, without depositing real USDC.
-    setVaults(results.filter((v) => (v.bps > 0 && v.value > 0n) || v.received > 0n || v.owed > 0n).reverse());
+    // at a beneficiary, without depositing real funds.
+    setVaults(
+      results.filter((v) => (v.bps > 0 && v.value.length > 0) || v.received.length > 0 || v.owed.length > 0).reverse()
+    );
   }, [provider, address]);
 
   useEffect(() => {
@@ -88,12 +99,12 @@ const PILL = {
 
 function line(v) {
   const share = `${v.bps / 100}%`;
-  if (v.owed > 0n) return `${formatUsdc(v.owed)} USDC couldn't be sent to this address and is being held for you.`;
+  if (v.owed.length > 0) return `${formatAssets(v.owed)} couldn't be sent to this address and is being held for you.`;
   if (v.state === "Active")
-    return `Your share is ${share}, ${formatUsdc(v.value)} USDC today. Sent to you in ${formatSpan(v.timeLeft)} unless the owner checks in.`;
+    return `Your share is ${share}: ${formatAssets(v.value)} today. Sent to you in ${formatSpan(v.timeLeft)} unless the owner checks in.`;
   if (v.state === "Due")
-    return `The timer has run out. Your ${formatUsdc(v.value)} USDC (${share}) is sent within about a day, or pay out now.`;
-  if (v.received > 0n) return `${formatUsdc(v.received)} USDC was sent to your wallet.`;
+    return `The timer has run out. Your ${share} (${formatAssets(v.value)}) is sent within about a day, or pay out now.`;
+  if (v.received.length > 0) return `${formatAssets(v.received)} was sent to your wallet.`;
   return "Closed by its owner.";
 }
 
@@ -106,10 +117,12 @@ export default function Incoming({ onDone, onError, always }) {
 
   if (!vaults?.length && !always) return null;
 
-  async function act(vAddr, call, message) {
+  // `calls` builds one transaction per entry, sent one after another.
+  async function act(vAddr, calls, message) {
     setBusy(vAddr);
     try {
-      await (await call(new Contract(vAddr, VAULT_ABI, signer))).wait();
+      const contract = new Contract(vAddr, VAULT_ABI, signer);
+      for (const call of calls) await (await call(contract)).wait();
       await load();
       await onDone({ message });
     } catch (err) {
@@ -143,17 +156,23 @@ export default function Incoming({ onDone, onError, always }) {
                 className="btn"
                 type="button"
                 disabled={busy === v.vAddr}
-                onClick={() => act(v.vAddr, (c) => c.distribute(), `${v.name || "Vault"} paid out to every beneficiary.`)}
+                onClick={() => act(v.vAddr, [(c) => c.distribute()], `${v.name || "Vault"} paid out to every beneficiary.`)}
               >
                 {busy === v.vAddr ? "Paying out…" : "Pay out now"}
               </button>
             )}
-            {v.owed > 0n && (
+            {v.owed.length > 0 && (
               <button
                 className="btn"
                 type="button"
                 disabled={busy === v.vAddr}
-                onClick={() => act(v.vAddr, (c) => c.withdrawOwed(), "Held payout sent to your wallet.")}
+                onClick={() =>
+                  act(
+                    v.vAddr,
+                    v.owed.map((o) => (c) => c.withdrawOwed(o.token)),
+                    "Held payout sent to your wallet."
+                  )
+                }
               >
                 {busy === v.vAddr ? "Retrying…" : "Retry payout"}
               </button>

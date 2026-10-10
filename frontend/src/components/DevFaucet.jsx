@@ -1,24 +1,26 @@
 import { useState } from "react";
 import { Contract, parseUnits } from "ethers";
 import { useWeb3 } from "../Web3Context.jsx";
-import { ARC_CONFIG, IS_LOCAL_DEV } from "../config.js";
+import { CHAIN_CONFIG } from "../config.js";
 import { MOCK_ERC20_ABI } from "../abis/ERC20.js";
 
-// Local-dev-only: mints MockUSDC to the connected wallet. Tree-shaken out of
-// every non-local build — IS_LOCAL_DEV is a compile-time target flag,
-// so this never ships to the testnet or mainnet builds. Never touches real USDC.
+// Mints the test stablecoins to the connected wallet. Only the local node and
+// testnet have mintable tokens in their config, so on mainnet this renders
+// nothing and never touches a real token.
+const MINTABLE = CHAIN_CONFIG.tokens.filter((t) => t.mintable);
 export default function DevFaucet() {
   const { signer, address, refreshBalance } = useWeb3();
   const [busy, setBusy] = useState(false);
 
-  if (!IS_LOCAL_DEV || !address) return null;
+  if (MINTABLE.length === 0 || !address) return null;
 
   async function mint() {
     setBusy(true);
     try {
-      const usdc = new Contract(ARC_CONFIG.usdcAddress, MOCK_ERC20_ABI, signer);
-      const tx = await usdc.mint(address, parseUnits("1000", 6));
-      await tx.wait();
+      for (const token of MINTABLE) {
+        const contract = new Contract(token.address, MOCK_ERC20_ABI, signer);
+        await (await contract.mint(address, parseUnits("1000", token.decimals))).wait();
+      }
       await refreshBalance();
     } finally {
       setBusy(false);
@@ -27,9 +29,9 @@ export default function DevFaucet() {
 
   return (
     <div className="kv">
-      <span className="hint">Local dev only</span>
+      <span className="hint">Test network only</span>
       <button type="button" className="btn" onClick={mint} disabled={busy}>
-        {busy ? "Minting…" : "Mint 1,000 test USDC"}
+        {busy ? "Minting…" : `Mint 1,000 test ${MINTABLE.map((t) => t.symbol).join(" and ")}`}
       </button>
     </div>
   );
