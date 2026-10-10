@@ -20,7 +20,7 @@ function arg(name) {
 
 function factoryAddress(network) {
   if (process.env.FACTORY_ADDRESS) return process.env.FACTORY_ADDRESS;
-  // Written by script/deploy-testnet.js / script/deploy.js.
+  // Written by script/deploy.js.
   const file = path.join(__dirname, "..", "frontend", "src", network === "mainnet" ? "deployedMainnet.js" : "deployedTestnet.js");
   const match = fs.readFileSync(file, "utf8").match(/factory:\s*"(0x[0-9a-fA-F]{40})"/);
   if (match && !/^0x0{40}$/.test(match[1])) return match[1];
@@ -37,7 +37,7 @@ async function main() {
   const wallet = keeperWallet({
     network,
     privateKey: process.env.KEEPER_PRIVATE_KEY,
-    rpcUrl: network === "mainnet" ? process.env.ARC_RPC_URL : undefined,
+    rpcUrl: network === "mainnet" ? process.env.MONAD_RPC_URL : undefined,
   });
   const factory = factoryAddress(network);
   const intervalMs = Number(process.env.KEEPER_INTERVAL_SECONDS || 30) * 1000;
@@ -51,7 +51,7 @@ async function main() {
       if (result.distributed.length > 0 || once) {
         log(
           `checked ${result.checked} vaults, distributed ${result.distributed.length}, ` +
-            `skipped ${result.skipped}, wallet ${result.wallet.balance} USDC`
+            `skipped ${result.skipped}, wallet ${result.wallet.balance} MON`
         );
       }
     } catch (err) {

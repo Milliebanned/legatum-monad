@@ -1,68 +1,90 @@
 // Deploys VaultFactory (and, inside its constructor, the single Vault
-// implementation clones point at) to Arc mainnet.
+// implementation every vault is a clone of) plus KeeperReceiver to Monad
+// mainnet or testnet, then publishes the sources through Sourcify.
 //
-// Arc mainnet only: VaultFactory's constructor itself reverts if the chain
-// ID isn't 5042, so this script can't accidentally deploy anywhere else.
-// There is no chain flag, no network switch beyond what's in hardhat.config.js.
+// On testnet it also deploys two test stablecoins anyone can mint, standing
+// in for USDC and AUSD.
 //
 // Usage:
-//   npx hardhat run script/deploy.js --network arc
+//   npx hardhat run script/deploy.js --network monadTestnet
+//   npx hardhat run script/deploy.js --network monad
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { ethers, network } = require("hardhat");
 
-async function main() {
-  if (network.name !== "arc") {
-    throw new Error(
-      `Refusing to deploy on network "${network.name}". Use --network arc.`
-    );
-  }
+const TARGETS = {
+  monad: { chainId: 143, file: "deployedMainnet.js", label: "Monad mainnet" },
+  monadTestnet: { chainId: 10143, file: "deployedTestnet.js", label: "Monad testnet" },
+};
 
-  const usdcAddress = process.env.ARC_USDC_ADDRESS;
-  if (!usdcAddress || usdcAddress === "") {
-    throw new Error(
-      "ARC_USDC_ADDRESS is not set. Fill it in from official Arc/Circle docs before deploying."
-    );
+async function deploy(name, ...args) {
+  const contract = await (await ethers.getContractFactory(name)).deploy(...args);
+  await contract.waitForDeployment();
+  return contract;
+}
+
+async function main() {
+  const target = TARGETS[network.name];
+  if (!target) {
+    throw new Error(`Refusing to deploy on network "${network.name}". Use --network monad or monadTestnet.`);
   }
 
   const [deployer] = await ethers.getSigners();
-  console.log("Deploying with account:", deployer.address);
+  const balance = await ethers.provider.getBalance(deployer.address);
+  console.log(`Deploying to ${target.label} as ${deployer.address} (${ethers.formatEther(balance)} MON)`);
+  if (balance === 0n) throw new Error(`${deployer.address} has no MON to pay for gas.`);
 
-  const Factory = await ethers.getContractFactory("VaultFactory");
-  const factory = await Factory.deploy(usdcAddress);
-  await factory.waitForDeployment();
-
+  const factory = await deploy("VaultFactory");
   const factoryAddress = await factory.getAddress();
   const implAddress = await factory.vaultImplementation();
+  const receipt = await factory.deploymentTransaction().wait();
+  console.log("VaultFactory:", factoryAddress);
+  console.log("Vault implementation:", implAddress);
 
-  const deployTx = factory.deploymentTransaction();
-  const receipt = await deployTx.wait();
+  const receiverAddress = await (await deploy("KeeperReceiver")).getAddress();
+  console.log("KeeperReceiver:", receiverAddress);
 
-  console.log("VaultFactory deployed at:", factoryAddress);
-  console.log("Vault implementation deployed at:", implAddress);
-  console.log("USDC address used:", usdcAddress);
-  console.log("Deploy tx:", receipt.hash, "block", receipt.blockNumber);
+  const tokens = {};
+  if (network.name === "monadTestnet") {
+    tokens.usdc = await (await deploy("TestToken", "Test USDC", "USDC", 6)).getAddress();
+    tokens.ausd = await (await deploy("TestToken", "Test AUSD", "AUSD", 6)).getAddress();
+    console.log("Test USDC:", tokens.usdc);
+    console.log("Test AUSD:", tokens.ausd);
+  }
 
   // The app (frontend/src/config.js) and the keeper (frontend/api/keeper.js)
-  // read the mainnet factory from here.
-  const outPath = path.join(__dirname, "..", "frontend", "src", "deployedMainnet.js");
+  // read the addresses from here.
+  const lines = [
+    `  factory: "${factoryAddress}",`,
+    `  vaultImplementation: "${implAddress}",`,
+    `  keeperReceiver: "${receiverAddress}",`,
+    ...Object.entries(tokens).map(([key, address]) => `  ${key}: "${address}",`),
+  ];
   fs.writeFileSync(
-    outPath,
-    `// Written by script/deploy.js after the Arc mainnet deployment
+    path.join(__dirname, "..", "frontend", "src", target.file),
+    `// Written by script/deploy.js after the ${target.label} deployment
 // (tx ${receipt.hash}, block ${receipt.blockNumber}).
 export default {
-  factory: "${factoryAddress}",
-  vaultImplementation: "${implAddress}",
+${lines.join("\n")}
 };
 `
   );
-  console.log("Wrote frontend/src/deployedMainnet.js");
+  console.log(`Wrote frontend/src/${target.file}`);
 
-  // Publish both sources (every vault is a clone of the implementation, so
-  // verifying it covers them all). A failure here doesn't undo the
-  // deployment; the command can simply be run again.
-  const verifyArgs = ["script/verify-sourcify.js", "5042", factoryAddress, "VaultFactory", implAddress, "Vault"];
+  // Every vault is a clone of the implementation, so verifying it covers
+  // them all. A failure here doesn't undo the deployment; the command can
+  // simply be run again.
+  const verifyArgs = [
+    "script/verify-sourcify.js",
+    String(target.chainId),
+    factoryAddress,
+    "VaultFactory",
+    implAddress,
+    "Vault",
+    receiverAddress,
+    "KeeperReceiver",
+  ];
   try {
     execFileSync("node", verifyArgs, { stdio: "inherit", cwd: path.join(__dirname, "..") });
   } catch {

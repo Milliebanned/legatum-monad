@@ -4,7 +4,7 @@
 // the app.
 //
 // Environment (Vercel project settings):
-//   KEEPER_PRIVATE_KEY  wallet that pays gas for distribute() (holds a few USDC)
+//   KEEPER_PRIVATE_KEY  wallet that pays gas for distribute() (holds a little MON)
 //   KEEPER_NETWORK      "testnet" or "mainnet". Required: with no default, a
 //                       mainnet deployment missing it fails loudly instead
 //                       of quietly watching testnet.
@@ -21,8 +21,8 @@ export const config = { maxDuration: 60 };
 
 // Vaults a pass comfortably gets through; the next day's pass starts this far on.
 const SCAN_STRIDE = 2000;
-// Below this many USDC the keeper wallet needs topping up.
-const LOW_BALANCE = 0.1;
+// Below this many MON the keeper wallet needs topping up.
+const LOW_BALANCE = 1;
 
 export default async function handler(req, res) {
   const secret = process.env.CRON_SECRET;
@@ -48,10 +48,10 @@ export default async function handler(req, res) {
     const result = await runKeeperPass({ wallet, factoryAddress, startAt, log: console.log });
     console.log(
       `keeper ${network}: checked ${result.checked}/${result.total}, distributed ${result.distributed.length}, ` +
-        `skipped ${result.skipped}, wallet ${result.wallet.balance} USDC`
+        `skipped ${result.skipped}, wallet ${result.wallet.balance} MON`
     );
     const low = result.wallet.balance !== null && Number(result.wallet.balance) < LOW_BALANCE;
-    if (low) console.error(`keeper wallet ${result.wallet.address} is low on gas: ${result.wallet.balance} USDC`);
+    if (low) console.error(`keeper wallet ${result.wallet.address} is low on gas: ${result.wallet.balance} MON`);
     // A low wallet is reported as a failed run so Vercel's cron log flags it.
     return res.status(low ? 500 : 200).json({ network, lowBalance: low, ...result });
   } catch (err) {

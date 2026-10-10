@@ -1,17 +1,17 @@
 {
-  "name": "legatumarca",
+  "name": "legatum-monad",
   "version": "0.1.0",
   "private": true,
-  "description": "Non-custodial USDC dead-man's-switch vault on Arc mainnet",
+  "description": "Non-custodial dead-man's-switch vault for MON and stablecoins on Monad",
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
     "node": "hardhat node",
     "deploy:local": "hardhat run script/deploy-local.js --network localhost",
-    "deploy:testnet": "hardhat run script/deploy-testnet.js --network arcTestnet",
-    "deploy:arc": "hardhat run script/deploy.js --network arc",
+    "deploy:testnet": "hardhat run script/deploy.js --network monadTestnet",
     "keeper:testnet": "node script/keeper.js --network testnet",
-    "keeper:mainnet": "node script/keeper.js --network mainnet"
+    "keeper:mainnet": "node script/keeper.js --network mainnet",
+    "deploy:monad": "hardhat run script/deploy.js --network monad"
   },
   "license": "MIT",
   "devDependencies": {

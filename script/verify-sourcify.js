@@ -1,13 +1,12 @@
-// Publishes the deployed contracts' source through Sourcify, which Arc's
-// block explorer reads from. Used for mainnet, where the explorer's own
-// verification API sits behind a browser check that scripts can't pass.
+// Publishes the deployed contracts' source through Sourcify, which Monad's
+// block explorers read from.
 //
 // Usage: node script/verify-sourcify.js <chainId> <address> <ContractName> [<address> <ContractName> ...]
 const fs = require("fs");
 const path = require("path");
 
 const API = "https://sourcify.dev/server/v2";
-const HEADERS = { "content-type": "application/json", "user-agent": "legatumarca-verify/1.0" };
+const HEADERS = { "content-type": "application/json", "user-agent": "legatum-verify/1.0" };
 
 // The compiler input Hardhat recorded for `name`, exactly as it was built.
 function buildInfo(name) {
