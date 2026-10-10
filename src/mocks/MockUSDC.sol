@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @dev Test-only stand-in for USDC (6 decimals, mintable). Not part of the
-///      deployed system — Arc mainnet deployments use the real USDC token.
+///      deployed system — mainnet deployments use the real USDC token.
 contract MockUSDC is ERC20 {
     constructor() ERC20("Mock USDC", "USDC") {}
 

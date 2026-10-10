@@ -9,7 +9,7 @@ describe("VaultFactory", function () {
     const MockUSDC = await ethers.getContractFactory("MockUSDC");
     const usdc = await MockUSDC.deploy();
     const Factory = await ethers.getContractFactory("VaultFactory");
-    const factory = await Factory.deploy(await usdc.getAddress());
+    const factory = await Factory.deploy();
     return { factory, usdc };
   }
 
@@ -25,9 +25,9 @@ describe("VaultFactory", function () {
       .find((e) => e && e.name === "VaultCreated");
   }
 
-  it("deploys only on Arc mainnet (chainId 5042)", async function () {
+  it("runs its tests on a Monad chain ID", async function () {
     const network = await ethers.provider.getNetwork();
-    expect(network.chainId).to.equal(5042n);
+    expect(network.chainId).to.equal(10143n);
   });
 
   it("creates a vault clone and initializes it", async function () {
@@ -148,9 +148,9 @@ describe("VaultFactory", function () {
   });
 
   it("rejects beneficiaries that could never move their share", async function () {
-    const { factory, usdc } = await deployFactory();
+    const { factory } = await deployFactory();
     const [owner] = await ethers.getSigners();
-    for (const stuck of [await usdc.getAddress(), await factory.getAddress()]) {
+    for (const stuck of [await factory.getAddress()]) {
       await expect(
         factory.connect(owner).createVault("x", [stuck], [10000], INTERVAL, GRACE)
       ).to.be.revertedWith("Invalid beneficiary");
@@ -189,10 +189,5 @@ describe("VaultFactory", function () {
     expect(all.length).to.equal(2);
     expect(all[0]).to.equal((await factory.getVaultsByOwner(ownerA.address))[0]);
     expect(all[1]).to.equal((await factory.getVaultsByOwner(ownerB.address))[0]);
-  });
-
-  it("reverts factory deployment with zero USDC address", async function () {
-    const Factory = await ethers.getContractFactory("VaultFactory");
-    await expect(Factory.deploy(ethers.ZeroAddress)).to.be.revertedWith("Invalid USDC address");
   });
 });

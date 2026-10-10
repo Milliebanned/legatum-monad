@@ -7,14 +7,10 @@ import "./Vault.sol";
 /// @title VaultFactory
 /// @notice Deploys the single Vault implementation and mints minimal-proxy
 ///         clones of it. An owner can hold any number of vaults, each with its
-///         own beneficiaries, shares and check-in timer. Arc mainnet only — the
+///         own beneficiaries, shares and check-in timer. Monad only — the
 ///         constructor reverts on any other chain, with no override.
 contract VaultFactory is IVaultRegistry {
-    // Arc mainnet chain ID. Never configurable, never overridden.
-    uint256 public constant CHAIN_ID = 5042;
-
     address public immutable vaultImplementation;
-    address public immutable usdc;
 
     mapping(address => address[]) internal ownerVaults;
     mapping(address => address[]) internal beneficiaryVaults;
@@ -32,35 +28,35 @@ contract VaultFactory is IVaultRegistry {
         uint256 gracePeriod
     );
 
-    /// @param usdcAddress USDC token address on Arc mainnet.
-    constructor(address usdcAddress) {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        require(chainId == CHAIN_ID, "This contract only deploys on Arc mainnet (5042)");
-        require(usdcAddress != address(0), "Invalid USDC address");
-
-        usdc = usdcAddress;
-        vaultImplementation = address(new Vault(usdcAddress));
+    constructor() {
+        // Vault's own constructor refuses any chain but Monad.
+        vaultImplementation = address(new Vault());
     }
 
     /// @dev Creates a new vault owned by the caller. Beneficiary and share
     ///      validation lives in Vault.initialize, which reverts the whole call.
+    ///      Any MON sent along goes into the vault as its first deposit.
     /// @param name Owner-chosen label (e.g. "Family"), at most 64 bytes.
-    /// @param beneficiaries Addresses that can claim if the owner goes inactive.
+    /// @param beneficiaries Addresses paid if the owner goes inactive.
     /// @param shares Basis points per beneficiary (same order); must total 10_000.
     /// @param checkInInterval Seconds between required check-ins.
-    /// @param gracePeriod Additional seconds of buffer before beneficiaries can claim.
+    /// @param gracePeriod Additional seconds of buffer before the payout.
     function createVault(
         string calldata name,
         address[] calldata beneficiaries,
         uint256[] calldata shares,
         uint256 checkInInterval,
         uint256 gracePeriod
-    ) external returns (address) {
+    ) external payable returns (address) {
         address vault = Clones.clone(vaultImplementation);
-        Vault(vault).initialize(msg.sender, name, beneficiaries, shares, checkInInterval, gracePeriod);
+        Vault(payable(vault)).initialize{value: msg.value}(
+            msg.sender,
+            name,
+            beneficiaries,
+            shares,
+            checkInInterval,
+            gracePeriod
+        );
 
         isVault[vault] = true;
         ownerVaults[msg.sender].push(vault);
@@ -116,6 +112,27 @@ contract VaultFactory is IVaultRegistry {
         page = new address[](end - from);
         for (uint256 i = from; i < end; i++) {
             page[i - from] = allVaults[i];
+        }
+    }
+
+    /// @dev The vaults among [from, from + count) whose timer has run out and
+    ///      that haven't been paid yet, so a keeper finds its work in one call
+    ///      per page.
+    function getDueVaults(uint256 from, uint256 count) external view returns (address[] memory due) {
+        uint256 end = from + count;
+        if (end > allVaults.length) end = allVaults.length;
+        if (from >= end) return new address[](0);
+
+        address[] memory found = new address[](end - from);
+        uint256 n;
+        for (uint256 i = from; i < end; i++) {
+            if (Vault(payable(allVaults[i])).isDue()) {
+                found[n++] = allVaults[i];
+            }
+        }
+        due = new address[](n);
+        for (uint256 i = 0; i < n; i++) {
+            due[i] = found[i];
         }
     }
 
