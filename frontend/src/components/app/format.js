@@ -69,12 +69,26 @@ export function shortAddress(address) {
   return address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
 }
 
+// Monad makes a wallet that runs as a smart account (as the ones made for an
+// email sign-in can) keep 10 MON back for gas, and refuses anything that
+// would spend into it. The node's own wording for that helps nobody.
+const RESERVE =
+  "Monad keeps the first 10 MON in this wallet in reserve for gas, so only MON above that can be deposited or sent. " +
+  "Use USDC or AUSD instead, or leave the deposit empty and add funds later.";
+
 // ethers reports an error it doesn't recognise as "could not coalesce
 // error" and keeps what the wallet actually said underneath; show that.
-export const txError = (err, fallback) =>
+const rawTxError = (err, fallback) =>
   err?.reason ??
   err?.info?.error?.message ??
   err?.error?.message ??
   (err?.shortMessage === "could not coalesce error" ? null : err?.shortMessage) ??
   err?.message ??
   fallback;
+
+export const txError = (err, fallback) => {
+  const text = rawTxError(err, fallback);
+  if (/reserve balance violation/i.test(`${text} ${err?.details ?? ""} ${err?.message ?? ""}`)) return RESERVE;
+  if (/insufficient (balance|funds)/i.test(String(text))) return "This wallet doesn't hold enough for that amount plus gas.";
+  return text;
+};

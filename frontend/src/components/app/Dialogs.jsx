@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Contract, formatUnits, parseUnits } from "ethers";
 import { useWeb3 } from "../../Web3Context.jsx";
-import { CHAIN_CONFIG, DEFAULT_TOKEN, NATIVE, tokenInfo } from "../../config.js";
+import { CHAIN_CONFIG, DEFAULT_TOKEN, IS_TESTNET_BUILD, NATIVE, tokenInfo } from "../../config.js";
 import { VAULT_FACTORY_ABI } from "../../abis/VaultFactory.js";
 import { VAULT_ABI } from "../../abis/Vault.js";
 import { ERC20_ABI } from "../../abis/ERC20.js";
@@ -103,7 +103,10 @@ async function depositInto(vaultAddress, token, amount, signer, setStatus) {
 }
 
 // The contract refuses windows under a day (Vault.MIN_CHECK_IN_INTERVAL).
+// The test network also offers that shortest window, so a payout can be seen
+// the next day; a real vault shouldn't be on a timer that short.
 const WINDOWS = [
+  ...(IS_TESTNET_BUILD ? [{ label: "1 day (testing)", seconds: DAY }] : []),
   { label: "30 days", seconds: 30 * DAY },
   { label: "90 days", seconds: 90 * DAY },
   { label: "180 days", seconds: 180 * DAY },

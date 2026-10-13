@@ -160,7 +160,7 @@
 .app .btn.danger:hover{border-color:var(--alert);background:rgba(242,119,106,.15)}
 .app .link{background:none;border:0;padding:0;color:var(--accent);font-size:13px}
 .app .link:hover{color:var(--accent-hi)}
-.app .hint{color:var(--mute);font-size:12px}
+.app .hint{color:var(--mute);font-size:12px;overflow-wrap:anywhere}
 .app .err{color:var(--alert);font-size:12px}
 .app .full{grid-column:1/-1}
 .app .foot{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
