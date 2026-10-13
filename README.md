@@ -38,17 +38,17 @@ The app also has:
 
 ## Deployment
 
-Live on **Monad testnet** (chain ID 10143). Mainnet is not deployed yet.
+Live on **Monad mainnet** (chain ID 143) and on Monad testnet (chain ID 10143).
 
-| | Monad testnet |
-|---|---|
-| VaultFactory | `0xf99DC9C15c7640454CAa8D535128C81D30d0Eb07` |
-| Vault implementation | `0x08D2071Af0C2f49Bb2a6b0F7E11ED5d7f4aFC534` |
-| KeeperReceiver | `0x01F519E360Ff24321d4233bD8656418F1c33dE1a` |
-| Test USDC | `0xad502D1bd2DdCD1B4E7284b8DBf2b0c442f9721D` |
-| Test AUSD | `0xc29955e4bc3284481496992295DE60C407B41822` |
+| | Monad mainnet | Monad testnet |
+|---|---|---|
+| VaultFactory | `0x03b07238744F2F221EB104D19FC52cAb001fd445` | `0xf99DC9C15c7640454CAa8D535128C81D30d0Eb07` |
+| Vault implementation | `0x8723cB341FbbE7617A7eA8eA20183DEa3acF9AFD` | `0x08D2071Af0C2f49Bb2a6b0F7E11ED5d7f4aFC534` |
+| KeeperReceiver | `0xfA2E16Dc0b102cF4FD6259a2925Cc1F803Bc6838` | `0x01F519E360Ff24321d4233bD8656418F1c33dE1a` |
+| USDC | `0x754704Bc059F8C67012fEd69BC8A327a5aafb603` | `0xad502D1bd2DdCD1B4E7284b8DBf2b0c442f9721D` (test) |
+| AUSD | `0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a` | `0xc29955e4bc3284481496992295DE60C407B41822` (test) |
 
-The factory, vault and keeper receiver are source-verified on Sourcify (exact match). Every vault is a minimal-proxy clone of the vault implementation. On mainnet the app uses the real USDC (`0x754704Bc059F8C67012fEd69BC8A327a5aafb603`) and AUSD (`0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a`).
+On both networks the factory, vault and keeper receiver are source-verified on Sourcify (exact match). Every vault is a minimal-proxy clone of the vault implementation. Mainnet uses the real USDC and AUSD; the testnet ones are stand-ins anyone can mint.
 
 ## Contracts
 
